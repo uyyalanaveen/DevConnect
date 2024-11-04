@@ -14,6 +14,8 @@ const NavItems = [
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -46,8 +48,25 @@ const Navbar = () => {
     return () => unsubscribe();
   }, []);
 
+  const handleScroll = () => {
+    if (window.scrollY > lastScrollY && window.scrollY > 50) {
+      setShowNavbar(false);
+    } else {
+      setShowNavbar(true);
+    }
+    setLastScrollY(window.scrollY);
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
-    <nav className='bg-gray-800 text-white px-4 py-2'>
+    <nav
+      className={`text-white px-4 py-2 fixed w-full top-0 z-10 transition-transform duration-300 ease-in-out ${showNavbar ? 'translate-y-0' : '-translate-y-full'
+        }`}
+    >
       <div className='flex justify-between items-center'>
         <div className='flex items-center'>
           <img src={avatar} alt='avatar' className='w-10 h-10 rounded-full' />
@@ -65,7 +84,7 @@ const Navbar = () => {
             <Link
               to={item.href}
               key={index}
-              className='text-white hover:text-gray-200 ml-16 px-4 hover:bg-gray-800 py-1 rounded-md'
+              className='text-white hover:text-gray-200 ml-10 px-4 hover:bg-gray-800 py-1 rounded-md'
             >
               {item.name}
             </Link>
@@ -91,7 +110,7 @@ const Navbar = () => {
 
       {/* Sidebar with ease-in-out transition */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-gray-900 transform  ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 w-64 bg-gray-900 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
           } transition-transform ease-in-out duration-300 md:hidden`}
       >
         <div className='flex flex-col mt-2 p-4'>
@@ -111,17 +130,17 @@ const Navbar = () => {
           ))}
 
           {user ? (
-            <div className='flex items-center mt-6 h-full  relative bottom-0 space-x-4 flex-col '>
-            <div className='flex space-x-4 items-center'>
-              <img src={user.photoURL} alt='User avatar' className='w-10 h-10 rounded-full' />
-              <h1 className='text-white text-xl font-bold'>{user.displayName}</h1>
-            </div>
-                <button
-                  onClick={handleLogout}
-                  className='bg-red-500 px-3 py-1 mt-4 rounded text-white w-full text-center'
-                >
-                  Logout
-                </button>
+            <div className='flex items-center mt-6 h-full relative bottom-0 space-x-4 flex-col '>
+              <div className='flex space-x-4 items-center'>
+                <img src={user.photoURL} alt='User avatar' className='w-10 h-10 rounded-full' />
+                <h1 className='text-white text-xl font-bold'>{user.displayName}</h1>
+              </div>
+              <button
+                onClick={handleLogout}
+                className='bg-red-500 px-3 py-1 mt-4 rounded text-white w-full text-center'
+              >
+                Logout
+              </button>
             </div>
           ) : (
             <button
@@ -138,3 +157,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
